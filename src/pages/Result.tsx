@@ -7,13 +7,23 @@ import axiosInstance from '../config/axiosConfig';
 import Navbar from "../components/Navbar";
 import Chatbot from "../components/ChatBot";
 
+// Define the types for the analysis items
+interface AnalysisItem {
+    question_title: string;
+    options: string[];
+    user_option: string;
+    correct_option: string;
+    explanation: string;
+    isCorrect: 'Correct' | 'Incorrect'; // Assuming this is a string
+}
+
 function Result() {
     const user = useSelector((state: any) => state.user);
     const navigate = useNavigate();
     const cookie = new Cookie();
     const dispatch = useDispatch();
     const { result_id } = useParams();
-    const [analysis, setAnalysis] = useState<any[]>([]);
+    const [analysis, setAnalysis] = useState<AnalysisItem[]>([]);
 
     useEffect(() => {
         const token = cookie.get('user_token');
@@ -82,7 +92,7 @@ function Result() {
                             <div className="mb-2">
                                 <p className="text-sm text-gray-600 dark:text-gray-300">Available Options:</p>
                                 <ul className="list-disc pl-5">
-                                    {item.options.map((option, i) => (
+                                    {item.options.map((option: string, i: number) => (
                                         <li key={i} className="text-gray-900 dark:text-white">{option}</li>
                                     ))}
                                 </ul>

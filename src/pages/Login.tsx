@@ -1,248 +1,151 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { FaCheckCircle, FaClock, FaArrowLeft, FaArrowRight, FaPlayCircle } from "react-icons/fa";
-import { motion } from "framer-motion";
-import toast from "react-hot-toast";
-import Modal from "react-modal";
-import axiosInstance from "../config/axiosConfig";
+import React, { useEffect, useState } from "react";
+import EyeToggleSVG from "../components/Eye";
+import { Link, useNavigate } from "react-router-dom";
+import axiosInstance from '../config/axiosConfig'; // Import the configured Axios instance
+import toast from 'react-hot-toast';
+import Cookie from "universal-cookie";
+import Navbar from "../components/Navbar";
+import GoogleBox from "../components/GoogleBox";
+type event = React.ChangeEvent<HTMLInputElement>;
 
-function Quiz() {
-    const { category_id } = useParams();
-    const [questions, setQuestions] = useState([]);
-    const [currentQuestion, setCurrentQuestion] = useState(0);
-    const [answers, setAnswers] = useState([]);
-    const [timeLeft, setTimeLeft] = useState(10 * 60); // 10 minutes
-    const [quizStarted, setQuizStarted] = useState(false);
-    const [modalOpen, setModalOpen] = useState(true);
-    const navigate = useNavigate();
-
-    const getQuestions = async () => {
-        try {
-            const response = await axiosInstance.get(`/question/${category_id}`);
-            const questions = response.data.data;
-            setQuestions(questions);
-            setAnswers(Array(questions.length).fill(-1));
-        } catch (error) {
-            toast.error("Failed to load questions.");
-            navigate("/");
-        }
-    };
-
-    useEffect(() => {
-        if (category_id) getQuestions();
-    }, [category_id]);
-
-    useEffect(() => {
-        if (quizStarted && timeLeft > 0) {
-            const timer = setInterval(() => {
-                setTimeLeft((prev) => {
-                    if (prev % 60 === 0) {
-                        toast(`Time left: ${Math.floor(prev / 60)} minutes`, { icon: "⏱️" });
-                    }
-                    return prev - 1;
-                });
-            }, 1000);
-            return () => clearInterval(timer);
-        }
-        if (timeLeft === 0) {
-            toast.error("Time's up! Submitting quiz...");
-            handleSubmit();
-        }
-    }, [quizStarted, timeLeft]);
-
-    useEffect(() => {
-        // Detect when fullscreen mode changes
-        const handleFullScreenChange = () => {
-            if (!document.fullscreenElement) {
-                // If exiting fullscreen, redirect to home page
-                toast.error("Cheating attempt detected: Exiting fullscreen mode.");
-                navigate("/");
-            }
-        };
-
-        // Add event listener to detect fullscreen changes
-        document.addEventListener("fullscreenchange", handleFullScreenChange);
-
-        // Cleanup the event listener on component unmount
-        return () => {
-            document.removeEventListener("fullscreenchange", handleFullScreenChange);
-        };
-    }, []);
-
-    const handleAnswerChange = (index) => {
-        const updatedAnswers = [...answers];
-        updatedAnswers[currentQuestion] = index;
-        setAnswers(updatedAnswers);
-        if (currentQuestion < questions.length - 1) {
-            setTimeout(() => setCurrentQuestion((prev) => prev + 1), 500);
-        }
-    };
-
-    const handleBack = () => setCurrentQuestion((prev) => prev - 1);
-
-    const handleNext = () => {
-        if (answers[currentQuestion] === -1) {
-            toast.error("Please select an answer before proceeding!");
-            return;
-        }
-        setCurrentQuestion((prev) => prev + 1);
-    };
-
-    const handleSubmit = () => {
-        if (answers.includes(-1)) {
-            toast.error("You have unanswered questions!");
-            return;
-        }
-        const submissionData = questions.map((q, i) => ({
-            question_id: q._id,
-            selectedOption: answers[i],
-        }));
-        axiosInstance
-            .post("/submit-quiz", { category_id, submissionData })
-            .then(() => {
-                toast.success("Quiz submitted successfully!");
-                navigate("/");
-            })
-            .catch(() => toast.error("Failed to submit the quiz."));
-    };
-
-    const startQuiz = () => {
-        if (questions.length === 0) {
-            toast.error("No questions available!");
-            return;
-        }
-        setQuizStarted(true);
-        setModalOpen(false);
-        toast("Good luck! Let's ace this quiz! 🎉", { icon: "🚀" });
-        if (document.documentElement.requestFullscreen) {
-            document.documentElement.requestFullscreen();
-        }
-    };
-
-    const progress = (currentQuestion / questions.length) * 100;
-    const timeProgress = (timeLeft / (10 * 60)) * 100; // Calculate time remaining as a percentage
-
-    return (
-        <div className="min-h-screen flex flex-col items-center justify-center relative">
-            {/* Green Progress Border */}
-            {quizStarted && (
-                <div
-                    className="absolute top-0 left-0 h-2 bg-green-500 transition-all"
-                    style={{ width: `${progress}%` }}
-                />
-            )}
-
-            {/* Red Time Progress Border */}
-            {quizStarted && (
-                <div
-                    className="absolute bottom-0 left-0 h-2 bg-red-500 transition-all"
-                    style={{ width: `${timeProgress}%` }}
-                />
-            )}
-
-            {/* Start Quiz Modal */}
-            <Modal
-                isOpen={modalOpen}
-                className="fixed inset-0 flex items-center justify-center bg-black/20 backdrop-blur-md"
-                overlayClassName="fixed inset-0 bg-black/20"
-            >
-                <div className="rounded-lg shadow-2xl p-8 max-w-sm w-full mx-auto">
-                    <h2 className="text-3xl font-bold text-center text-gray-800 dark:text-white">
-                        Ready to start the quiz?
-                    </h2>
-                    <ul className="mt-6 space-y-3 text-gray-600 dark:text-gray-300 text-lg">
-                        <li>📋 <strong>15 Questions</strong></li>
-                        <li>⏱️ <strong>Time Limit: 10 minutes</strong></li>
-                        <li>✅ <strong>1 point per question</strong></li>
-                    </ul>
-                    <motion.button
-                        onClick={startQuiz}
-                        className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-6 py-3 rounded-lg mt-6 w-full text-xl font-semibold"
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                    >
-                        Start Quiz <FaPlayCircle className="ml-2 inline" />
-                    </motion.button>
-                </div>
-            </Modal>
-
-            {/* Timer */}
-            {quizStarted && (
-                <div className="absolute top-10 right-10 p-4 bg-white dark:bg-gray-900 text-black dark:text-white rounded-full shadow-lg flex items-center">
-                    <FaClock className="mr-2 text-blue-500" />
-                    <span className="lg:text-2xl">
-                        {Math.floor(timeLeft / 60)}:{timeLeft % 60 < 10 ? "0" : ""}
-                        {timeLeft % 60}
-                    </span>
-                </div>
-            )}
-
-            {/* Quiz Content */}
-            {quizStarted && questions.length > 0 && (
-                <motion.div
-                    className="w-full max-w-3xl p-8 rounded-lg shadow-lg"
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.5 }}
-                >
-                    <h2 className="text-2xl font-bold text-gray-800 dark:text-white text-center mb-4">
-                        Question {currentQuestion + 1} of {questions.length}
-                    </h2>
-                    <p className="text-xl p-3 text-gray-700 dark:text-gray-300 mb-6">
-                        {questions[currentQuestion].title}
-                    </p>
-                    <div className="space-y-4">
-                        {questions[currentQuestion].options.map((option, index) => (
-                            <motion.div
-                                key={index}
-                                className={`p-4 rounded-lg text-center cursor-pointer transition-all ${answers[currentQuestion] === index
-                                    ? "bg-blue-500 text-white"
-                                    : "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300"
-                                    }`}
-                                whileHover={{ scale: 1.03 }}
-                                whileTap={{ scale: 0.97 }}
-                                onClick={() => handleAnswerChange(index)}
-                            >
-                                {option}
-                            </motion.div>
-                        ))}
-                    </div>
-                    {/* Navigation */}
-                    <div className="mt-8 flex justify-between">
-                        <motion.button
-                            onClick={handleBack}
-                            disabled={currentQuestion === 0}
-                            className="px-6 py-3 bg-gray-300 text-gray-800 rounded-lg shadow-md disabled:opacity-50 dark:bg-gray-700 dark:text-gray-400"
-                            whileTap={{ scale: 0.95 }}
-                        >
-                            <FaArrowLeft className="inline mr-2" />
-                            Back
-                        </motion.button>
-                        {currentQuestion < questions.length - 1 && (
-                            <motion.button
-                                onClick={handleNext}
-                                className="px-6 py-3 bg-blue-500 text-white rounded-lg shadow-md"
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                            >
-                                Next <FaArrowRight className="inline ml-2" />
-                            </motion.button>
-                        )}
-                        {currentQuestion === questions.length - 1 && (
-                            <motion.button
-                                onClick={handleSubmit}
-                                className="px-6 py-3 bg-green-500 text-white rounded-lg shadow-md"
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                            >
-                                Submit <FaCheckCircle className="inline ml-2" />
-                            </motion.button>
-                        )}
-                    </div>
-                </motion.div>
-            )}
-        </div>
-    );
+interface Prop {
+    type: `user` | `admin`;
 }
 
-export default Quiz;
+function Login({ type }: Prop) {
+    const [email, setEmail] = useState(``);
+    const [password, setPassword] = useState(``);
+    const [showPassword, setShowPassword] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const navigate = useNavigate();
+    const cookie = new Cookie();
+    useEffect(() => {
+        document.title = `PCTE ${type.charAt(0).toUpperCase() + type.slice(1)} Login`;
+        const token = cookie.get(`${type}_token`);
+        if (token) navigate(`/${type}/dashboard`);
+    }, []);
+
+
+    const handleEmailChange = (e: event) => {
+        setEmail(e.target.value);
+    };
+    const handlePasswordChange = (e: event) => {
+        setPassword(e.target.value);
+    };
+    const handleShowPasswordToggle = () => {
+        setShowPassword(!showPassword);
+    };
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        if (password.length < 8) {
+            toast.error("Invalid email or password");
+            return;
+        }
+        try {
+            setIsLoading(true);
+            const response = await axiosInstance.post(`/${type}/login`, {
+                email,
+                password
+            });
+            toast.success(`Logged In Successfully`);
+            const token = response?.data?.token;
+            if (token) {
+                cookie.set(`${type}_token`, token, { path: `/`, expires: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) });
+                navigate(`/${type}/dashboard`);
+            }
+        } catch (error: any) {
+            const error_msg = error.response?.data?.message || "An error occurred";
+            toast.error(error_msg);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+
+    return (
+        <>
+            <Navbar />
+            <section className="min-h-screen pb-8 md:pb-0">
+                <div className="flex flex-col items-center justify-center h-screen px-6 py-8 mx-auto lg:py-0">
+                    <h1 className="flex items-center pt-10 mb-6 text-4xl font-semibold text-gray-900 dark:text-white">
+                        PCTE {type.charAt(0).toUpperCase() + type.slice(1)}
+                    </h1>
+
+                    <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
+                        <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
+                            <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
+                                Sign in to your account
+                            </h1>
+                            <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6" action="#">
+                                <div>
+                                    <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                        Your email
+                                    </label>
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        id="email"
+                                        value={email}
+                                        onChange={handleEmailChange}
+                                        className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                        placeholder="name@company.com"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                        Password
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            type={showPassword ? `text` : `password`}
+                                            name="password"
+                                            id="password"
+                                            value={password}
+                                            onChange={handlePasswordChange}
+                                            placeholder="••••••••"
+                                            className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                            required
+                                        />
+                                        <button
+                                            type="button"
+                                            className="absolute inset-y-0 right-0 flex items-center pr-3 text-sm leading-5 w-100"
+                                        >
+                                            <EyeToggleSVG handleShowPasswordToggle={handleShowPasswordToggle} />
+                                        </button>
+                                    </div>
+                                </div>
+                                <button
+                                    type="submit"
+                                    className="w-full dark:text-white bg-red-600 text-black focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+                                    disabled={isLoading}  // Disable the button during loading
+                                >
+                                    {isLoading ? (
+                                        <div className="flex items-center justify-center">
+                                            <div className="spinner"></div>
+                                        </div>) : (
+                                        `Sign In`  // Default text when not loading
+                                    )}
+                                </button>
+                                <GoogleBox setIsLoading={setIsLoading} type={type} />
+                                <p className="text-sm ">
+                                    <span className="text-gray-500 dark:text-gray-400">Don’t have an account yet?{` `}</span>
+                                    <Link to={`/${type}/signup`} className="font-medium text-primary-600 hover:underline dark:text-primary-500">
+                                        SignUp
+                                    </Link>
+                                </p>
+                                <Link to={`/${type}/forgot`} className="text-sm font-medium text-primary-600 hover:underline dark:text-primary-500">
+                                    Forgot Password?{` `}
+                                </Link>
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+        </>
+    )
+}
+
+export default Login;

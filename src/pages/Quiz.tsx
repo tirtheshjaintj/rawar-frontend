@@ -16,7 +16,7 @@ function Quiz() {
     const [quizStarted, setQuizStarted] = useState(false);
     const [modalOpen, setModalOpen] = useState(true);
     const navigate = useNavigate();
-    const user = useSelector((state: any) => state.user);
+    const user = useSelector((state) => state.user);
 
     const getQuestions = async () => {
         try {
@@ -70,7 +70,7 @@ function Quiz() {
         return () => {
             document.removeEventListener("fullscreenchange", handleFullScreenChange);
         };
-    }, []);
+    }, [navigate, user]);
 
     const handleAnswerChange = (index) => {
         const updatedAnswers = [...answers];
@@ -108,7 +108,7 @@ function Quiz() {
             })
             .catch((error) => {
                 toast.error("Failed to submit the quiz.");
-                console.log(error);
+                console.error(error);
             });
     };
 
@@ -142,7 +142,7 @@ function Quiz() {
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center relative">
-            {/* Green Progress Border */}
+            {/* Green Progress Bar */}
             {quizStarted && (
                 <div
                     className="absolute top-0 left-0 h-2 lg:h-4 rounded bg-green-500 transition-all"
@@ -178,7 +178,7 @@ function Quiz() {
 
             {/* Timer */}
             {quizStarted && (
-                <div className="absolute top-2 left-50 p-4 bg-white dark:bg-gray-900 text-black dark:text-white rounded-full shadow-lg flex items-center">
+                <div className="absolute top-2 left-1/2 transform -translate-x-1/2 p-4 bg-white dark:bg-gray-900 text-black dark:text-white rounded-full shadow-lg flex items-center">
                     <FaClock className="mr-2 text-blue-500" />
                     <span className="lg:text-2xl">
                         {Math.floor(timeLeft / 60)}:{timeLeft % 60 < 10 ? "0" : ""}
@@ -190,7 +190,7 @@ function Quiz() {
             {/* Quiz Content */}
             {quizStarted && questions.length > 0 && (
                 <motion.div
-                    className="w-full max-w-3xl p-8 rounded-lg shadow-lg"
+                    className="w-full max-w-3xl p-8 rounded-lg shadow-lg bg-white dark:bg-gray-800"
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.5 }}
@@ -198,10 +198,8 @@ function Quiz() {
                     <h2 className="text-2xl font-bold text-gray-800 dark:text-white text-center mb-4">
                         Question {currentQuestion + 1} of {questions.length}
                     </h2>
-
                     <p className="text-xl p-3 text-gray-700 dark:text-gray-300 mb-6">
                         {questions[currentQuestion].title}
-
                     </p>
                     <div className="space-y-4">
                         {questions[currentQuestion].options.map((option, index) => (
@@ -221,7 +219,7 @@ function Quiz() {
                     </div>
 
                     {/* Navigation */}
-                    <div className="mt-8 flex justify-between">
+                    <div className="mt-8 flex justify-between items-center">
                         <motion.button
                             onClick={handleBack}
                             disabled={currentQuestion === 0}
@@ -232,7 +230,7 @@ function Quiz() {
                             Back
                         </motion.button>
                         <span
-                            className={`inline-block p-2 m-2  text-sm rounded-full font-semibold ${getLevelClass(
+                            className={`inline-block px-4 py-2 text-sm rounded-full font-semibold ${getLevelClass(
                                 questions[currentQuestion].level
                             )}`}
                         >
@@ -248,7 +246,6 @@ function Quiz() {
                                 Next <FaArrowRight className="inline ml-2" />
                             </motion.button>
                         )}
-
                         {currentQuestion === questions.length - 1 && (
                             <motion.button
                                 onClick={handleSubmit}
