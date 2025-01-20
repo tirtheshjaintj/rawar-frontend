@@ -7,7 +7,7 @@ import axiosInstance from '../config/axiosConfig';
 
 interface GoogleBoxProps {
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  type: `user` | `seller`;
+  type: `user` | `admin`;
 
 }
 
