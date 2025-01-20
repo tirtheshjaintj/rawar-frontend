@@ -7,21 +7,33 @@ import Modal from "react-modal";
 import axiosInstance from "../config/axiosConfig";
 import { useSelector } from "react-redux";
 
+// Define types for question and answer structures
+interface Question {
+    _id: string;
+    title: string;
+    options: string[];
+    level: "easy" | "medium" | "hard";
+}
+
+interface ReduxState {
+    user: any; // Replace `any` with your user type if available
+}
+
 function Quiz() {
-    const { category_id } = useParams();
-    const [questions, setQuestions] = useState([]);
+    const { category_id } = useParams<{ category_id: string }>();
+    const [questions, setQuestions] = useState<Question[]>([]);
     const [currentQuestion, setCurrentQuestion] = useState(0);
-    const [answers, setAnswers] = useState([]);
+    const [answers, setAnswers] = useState<number[]>([]);
     const [timeLeft, setTimeLeft] = useState(10 * 60); // 10 minutes
     const [quizStarted, setQuizStarted] = useState(false);
     const [modalOpen, setModalOpen] = useState(true);
     const navigate = useNavigate();
-    const user = useSelector((state) => state.user);
+    const user = useSelector((state: ReduxState) => state.user);
 
     const getQuestions = async () => {
         try {
             const response = await axiosInstance.get(`/question/${category_id}`);
-            const questions = response.data.data;
+            const questions: Question[] = response.data.data;
             setQuestions(questions);
             setAnswers(Array(questions.length).fill(-1));
         } catch (error) {
@@ -72,7 +84,7 @@ function Quiz() {
         };
     }, [navigate, user]);
 
-    const handleAnswerChange = (index) => {
+    const handleAnswerChange = (index: number) => {
         const updatedAnswers = [...answers];
         updatedAnswers[currentQuestion] = index;
         setAnswers(updatedAnswers);
@@ -127,7 +139,7 @@ function Quiz() {
 
     const progress = (currentQuestion / questions.length) * 100;
 
-    const getLevelClass = (level) => {
+    const getLevelClass = (level: "easy" | "medium" | "hard") => {
         switch (level) {
             case "easy":
                 return "bg-green-500 text-white";

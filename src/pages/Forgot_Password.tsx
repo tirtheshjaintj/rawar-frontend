@@ -24,7 +24,6 @@ const Forgot_Password: React.FC<Prop> = ({ type }) => {
   const [loading, setLoading] = useState(false); // Loading state
   const navigate = useNavigate();
   const user = useSelector((state: any) => state.user);
-  const seller = useSelector((state: any) => state.user);
 
   // Resend OTP function
   const resendOtp = async () => {
@@ -35,7 +34,8 @@ const Forgot_Password: React.FC<Prop> = ({ type }) => {
         toast.success('OTP resent to your email!');
         setTimer(60); // Set timer for 60 seconds
         setResendDisabled(true); // Disable the button
-      } catch (error) {
+      } catch (error: any) {
+        console.log(error);
         toast.error('Failed to resend OTP. Please try again.');
       } finally {
         setLoading(false); // End loading
@@ -142,14 +142,6 @@ const Forgot_Password: React.FC<Prop> = ({ type }) => {
     }
   }, [user]);
 
-  useEffect(() => {
-    if (type === "seller" && seller && seller.email) {
-      setEmail(seller.email);
-      if (seller.email) {
-        handleEmailSubmit({ preventDefault: () => { } } as React.FormEvent);
-      }
-    }
-  }, [seller]);
 
 
 
