@@ -29,6 +29,7 @@ function Quiz() {
     const [modalOpen, setModalOpen] = useState(true);
     const navigate = useNavigate();
     const user = useSelector((state: ReduxState) => state.user);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 
     const getQuestions = async () => {
         try {
@@ -108,10 +109,14 @@ function Quiz() {
             toast.error("You have unanswered questions!");
             return;
         }
+
+        setIsLoading(true); // Set loading state to true when submission starts
+
         const submissionData = questions.map((q, i) => ({
             question_id: q._id,
             user_answer: answers[i],
         }));
+
         axiosInstance
             .post("/quiz/submit-quiz", { category_id, answers: submissionData })
             .then(() => {
@@ -121,8 +126,12 @@ function Quiz() {
             .catch((error) => {
                 toast.error("Failed to submit the quiz.");
                 console.error(error);
+            })
+            .finally(() => {
+                setIsLoading(false); // Set loading state back to false once submission finishes
             });
     };
+
 
     const startQuiz = () => {
         if (questions.length === 0) {
@@ -153,11 +162,11 @@ function Quiz() {
     };
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center relative">
+        <div className="relative flex flex-col items-center justify-center min-h-screen">
             {/* Green Progress Bar */}
             {quizStarted && (
                 <div
-                    className="absolute top-0 left-0 h-2 lg:h-4 rounded bg-green-500 transition-all"
+                    className="absolute top-0 left-0 h-2 transition-all bg-green-500 rounded lg:h-4"
                     style={{ width: `${progress}%` }}
                 />
             )}
@@ -168,29 +177,29 @@ function Quiz() {
                 className="fixed inset-0 flex items-center justify-center bg-black/20 backdrop-blur-md"
                 overlayClassName="fixed inset-0 bg-black/20"
             >
-                <div className="rounded-lg shadow-2xl p-8 max-w-sm w-full mx-auto">
+                <div className="w-full max-w-sm p-8 mx-auto rounded-lg shadow-2xl">
                     <h2 className="text-3xl font-bold text-center text-gray-800 dark:text-white">
                         Ready to start the quiz?
                     </h2>
-                    <ul className="mt-6 space-y-3 text-gray-600 dark:text-gray-300 text-lg">
+                    <ul className="mt-6 space-y-3 text-lg text-gray-600 dark:text-gray-300">
                         <li>📋 <strong>{questions.length} Questions</strong></li>
                         <li>⏱️ <strong>Time Limit: 10 minutes</strong></li>
                         <li>✅ <strong>1 point per question</strong></li>
                     </ul>
                     <motion.button
                         onClick={startQuiz}
-                        className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-6 py-3 rounded-lg mt-6 w-full text-xl font-semibold"
+                        className="w-full px-6 py-3 mt-6 text-xl font-semibold text-white rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                     >
-                        Start Quiz <FaPlayCircle className="ml-2 inline" />
+                        Start Quiz <FaPlayCircle className="inline ml-2" />
                     </motion.button>
                 </div>
             </Modal>
 
             {/* Timer */}
             {quizStarted && (
-                <div className="absolute top-2 left-1/2 transform -translate-x-1/2 p-4 bg-white dark:bg-gray-900 text-black dark:text-white rounded-full shadow-lg flex items-center">
+                <div className="absolute flex items-center p-4 text-black transform -translate-x-1/2 bg-white rounded-full shadow-lg top-2 left-1/2 dark:bg-gray-900 dark:text-white">
                     <FaClock className="mr-2 text-blue-500" />
                     <span className="lg:text-2xl">
                         {Math.floor(timeLeft / 60)}:{timeLeft % 60 < 10 ? "0" : ""}
@@ -202,15 +211,15 @@ function Quiz() {
             {/* Quiz Content */}
             {quizStarted && questions.length > 0 && (
                 <motion.div
-                    className="w-full max-w-3xl p-8 rounded-lg shadow-lg bg-white dark:bg-gray-800"
+                    className="w-full max-w-3xl p-8 bg-white rounded-lg shadow-lg dark:bg-gray-800"
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.5 }}
                 >
-                    <h2 className="text-2xl font-bold text-gray-800 dark:text-white text-center mb-4">
+                    <h2 className="mb-4 text-2xl font-bold text-center text-gray-800 dark:text-white">
                         Question {currentQuestion + 1} of {questions.length}
                     </h2>
-                    <p className="text-xl p-3 text-gray-700 dark:text-gray-300 mb-6">
+                    <p className="p-3 mb-6 text-xl text-gray-700 dark:text-gray-300">
                         {questions[currentQuestion].title}
                     </p>
                     <div className="space-y-4">
@@ -231,11 +240,11 @@ function Quiz() {
                     </div>
 
                     {/* Navigation */}
-                    <div className="mt-8 flex justify-between items-center">
+                    <div className="flex items-center justify-between mt-8">
                         <motion.button
                             onClick={handleBack}
                             disabled={currentQuestion === 0}
-                            className="px-6 py-3 bg-gray-300 text-gray-800 rounded-lg shadow-md disabled:opacity-50 dark:bg-gray-700 dark:text-gray-400"
+                            className="px-6 py-3 text-gray-800 bg-gray-300 rounded-lg shadow-md disabled:opacity-50 dark:bg-gray-700 dark:text-gray-400"
                             whileTap={{ scale: 0.95 }}
                         >
                             <FaArrowLeft className="inline mr-2" />
@@ -251,7 +260,7 @@ function Quiz() {
                         {currentQuestion < questions.length - 1 && (
                             <motion.button
                                 onClick={handleNext}
-                                className="px-6 py-3 bg-blue-500 text-white rounded-lg shadow-md"
+                                className="px-6 py-3 text-white bg-blue-500 rounded-lg shadow-md"
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                             >
@@ -261,11 +270,12 @@ function Quiz() {
                         {currentQuestion === questions.length - 1 && (
                             <motion.button
                                 onClick={handleSubmit}
-                                className="px-6 py-3 bg-green-500 text-white rounded-lg shadow-md"
+                                className="px-6 py-3 text-white bg-green-500 rounded-lg shadow-md"
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
+                                disabled={isLoading} // Disable the button while loading
                             >
-                                Submit <FaCheckCircle className="inline ml-2" />
+                                {isLoading ? "Submitting..." : "Submit"} <FaCheckCircle className="inline ml-2" />
                             </motion.button>
                         )}
                     </div>
