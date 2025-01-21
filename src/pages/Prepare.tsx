@@ -76,20 +76,20 @@ const Prepare: React.FC = () => {
         <>
             <Navbar />
             <Chatbot />
-            <div className="min-h-screen px-4 pt-20 py-6">
-                <h1 className="text-2xl font-bold mb-6 text-center">Prepare</h1>
+            <div className="min-h-screen px-4 py-6 pt-20">
+                <h1 className="mb-6 text-2xl font-bold text-center">Prepare</h1>
                 {loading ? (
-                    <div className="text-center text-lg">Loading...</div>
+                    <div className="text-lg text-center">Loading...</div>
                 ) : (
                     <div>
-                        <p className="text-lg mb-4">
+                        <p className="mb-4 text-lg">
                             Total Questions: {questions && questions.length}
                         </p>
                         <div className="grid gap-6">
                             {questions.map((question, index) => (
                                 <div
                                     key={question._id}
-                                    className="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6"
+                                    className="p-6 bg-white rounded-lg shadow-lg dark:bg-gray-800"
                                 >
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="text-xl font-semibold">
@@ -103,28 +103,29 @@ const Prepare: React.FC = () => {
                                             {question.level}
                                         </span>
                                     </div>
-                                    <ul className="list-disc pl-6 mb-4">
+                                    <ul className="pl-6 mb-4 list-disc">
                                         {question.options.map((option, optionIndex) => (
                                             <li key={optionIndex}>{option}</li>
                                         ))}
                                     </ul>
                                     <button
                                         onClick={() => toggleAnswerVisibility(question._id)}
-                                        className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+                                        className="px-4 py-2 font-bold text-white bg-blue-500 rounded hover:bg-blue-600"
                                     >
                                         {answersVisibility.get(question._id)
                                             ? "Hide Answer"
                                             : "Show Answer"}
                                     </button>
                                     {answersVisibility.get(question._id) && (
-                                        <div className="mt-4 bg-gray-100 dark:bg-gray-700 p-4 rounded">
+                                        <div className="p-4 mt-4 bg-gray-100 rounded dark:bg-gray-700">
                                             <p>
                                                 <strong>Correct Answer:</strong>{" "}
-                                                {question.options[question.correctAnswerIndex]}
                                             </p>
+                                            <p>{question.options[question.correctAnswerIndex]}</p>
                                             <p>
-                                                <strong>Explanation:</strong> {question.explanation}
+                                                <strong>Explanation:</strong>
                                             </p>
+                                            <p>{question.explanation}</p>
                                         </div>
                                     )}
                                 </div>

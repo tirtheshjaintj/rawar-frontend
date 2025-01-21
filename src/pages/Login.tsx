@@ -52,7 +52,7 @@ function Login({ type }: Prop) {
             const token = response?.data?.token;
             if (token) {
                 cookie.set(`${type}_token`, token, { path: `/`, expires: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) });
-                navigate(`/${type}/dashboard`);
+                navigate("/");
             }
         } catch (error: any) {
             const error_msg = error.response?.data?.message || "An error occurred";
