@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { FaPlay } from "react-icons/fa"; // React Icon for play button
+import { FaBook, FaPlay } from "react-icons/fa"; // React Icon for play button
 import { motion } from "framer-motion"; // For animations
-import { useNavigate } from "react-router-dom"; // To navigate to quiz page
+import { Link, useNavigate } from "react-router-dom"; // To navigate to quiz page
 import axiosInstance from "../config/axiosConfig";
 import Chatbot from "../components/ChatBot";
 import { useSelector } from "react-redux";
@@ -64,11 +64,12 @@ function Home() {
                             <motion.div
                                 key={category._id}
                                 className="relative overflow-hidden transition-transform duration-500 shadow-lg cursor-pointer rounded-xl hover:shadow-2xl"
-                                onClick={() => handleClick(category._id)}
                                 whileHover={{ scale: 1.05 }}
                             >
                                 {/* Animated Image */}
-                                <div className="relative">
+                                <div className="relative"
+                                    onClick={() => handleClick(category._id)}
+                                >
                                     <img
                                         src={category.image}
                                         alt={category.name}
@@ -84,10 +85,13 @@ function Home() {
                                     <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
                                         {category.name}
                                     </h3>
-                                    <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                                        Click to start quiz
-                                    </p>
-                                </div>
+                                    <Link to={`/prepare/${category._id}`}
+                                        className="flex my-3 float-right items-center gap-2 px-6 py-3 
+                                       bg-black   text-white font-bold rounded-lg shadow-lg  transform hover:scale-105 transition-all duration-500 ease-in-out"
+                                    >
+                                        <FaBook className="text-xl" />
+                                        <span>Prepare</span>
+                                    </Link>                                </div>
                                 {/* Optional Glow effect on hover */}
                                 <div className="absolute inset-0 opacity-0 pointer-events-none rounded-xl hover:opacity-10"></div>
                             </motion.div>

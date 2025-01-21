@@ -132,10 +132,10 @@ function Dashboard() {
                                 </div>
                                 <div
                                     className={`${tag === "Excellent"
-                                            ? "bg-green-500"
-                                            : tag === "Good"
-                                                ? "bg-yellow-500"
-                                                : "bg-red-500"
+                                        ? "bg-green-500"
+                                        : tag === "Good"
+                                            ? "bg-yellow-500"
+                                            : "bg-red-500"
                                         } text-white py-1 px-3 rounded-full text-sm`}
                                 >
                                     {tag}

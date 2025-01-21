@@ -12,6 +12,7 @@ import User_Signup from './pages/user/User_Signup.tsx';
 import Forgot_Password from './pages/Forgot_Password.tsx';
 import Quiz from './pages/Quiz.tsx';
 import Result from './pages/Result.tsx';
+import Prepare from './pages/Prepare.tsx';
 
 const router = createBrowserRouter(
   createRoutesFromChildren(
@@ -22,6 +23,7 @@ const router = createBrowserRouter(
       <Route path="/user/signup" element={<User_Signup />} />
       <Route path="/user/forgot" element={<Forgot_Password type="user" />} />
       <Route path="/quiz/:category_id" element={<Quiz />} />
+      <Route path="/prepare/:category_id" element={<Prepare />} />
       <Route path="/result/:result_id" element={<Result />} />
     </Route>
   )
