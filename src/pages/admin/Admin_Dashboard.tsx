@@ -119,7 +119,7 @@ const Admin_Dashboard: React.FC = () => {
     const handleQuestionChange = (
         index: number,
         field: string,
-        value: string
+        value: any
     ) => {
         setQuestions((prevQuestions) => {
             const updatedQuestions = [...prevQuestions];
