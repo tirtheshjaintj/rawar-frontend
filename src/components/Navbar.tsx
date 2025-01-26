@@ -79,6 +79,11 @@ export default function Nav() {
                                     <Dropdown.Item>
                                         Dashboard
                                     </Dropdown.Item>
+                                    <Link to={"../admin/dashboard"}>
+                                        <Dropdown.Item>
+                                            Become Admin
+                                        </Dropdown.Item>
+                                    </Link>
                                 </Link>
                                 <Dropdown.Divider />
                                 <Dropdown.Item onClick={signOut}>Sign out</Dropdown.Item>
@@ -88,6 +93,11 @@ export default function Nav() {
                                 <Link to={"../user/dashboard"}>
                                     <Dropdown.Item>
                                         Become User
+                                    </Dropdown.Item>
+                                </Link>
+                                <Link to={"../admin/dashboard"}>
+                                    <Dropdown.Item>
+                                        Become Admin
                                     </Dropdown.Item>
                                 </Link>
                             </>

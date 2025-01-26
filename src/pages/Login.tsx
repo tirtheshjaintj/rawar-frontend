@@ -22,7 +22,7 @@ function Login({ type }: Prop) {
     useEffect(() => {
         document.title = `PCTE ${type.charAt(0).toUpperCase() + type.slice(1)} Login`;
         const token = cookie.get(`${type}_token`);
-        if (token) navigate(`/${type}/dashboard`);
+        if (token) navigate("/");
     }, []);
 
 
@@ -49,7 +49,7 @@ function Login({ type }: Prop) {
                 password
             });
             toast.success(`Logged In Successfully`);
-            const token = response?.data?.token;
+            const token = response.data.token;
             if (token) {
                 cookie.set(`${type}_token`, token, { path: `/`, expires: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) });
                 navigate("/");

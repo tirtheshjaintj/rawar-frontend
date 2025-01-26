@@ -32,7 +32,10 @@ const Prepare: React.FC = () => {
     const { category_id } = useParams<{ category_id: string }>();
     const navigate = useNavigate();
     const [questions, setQuestions] = useState<Question[]>([]);
+    const [filteredQuestions, setFilteredQuestions] = useState<Question[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
+    const [searchTerm, setSearchTerm] = useState<string>("");
+    const [selectedLevel, setSelectedLevel] = useState<string>("any"); // Filter state
     const [answersVisibility, setAnswersVisibility] = useState<Map<string, boolean>>(new Map());
 
     useEffect(() => {
@@ -40,11 +43,13 @@ const Prepare: React.FC = () => {
             try {
                 setLoading(true);
                 const response = await axiosInstance.get(`/question/${category_id}/all`);
-                setQuestions(response.data.data);
+                const data = response.data.data;
+                setQuestions(data);
+                setFilteredQuestions(data); // Set the initial filtered list
 
                 // Initialize visibility state for all questions
                 const initialVisibility = new Map<string, boolean>();
-                response.data.data.forEach((question: Question) => {
+                data.forEach((question: Question) => {
                     initialVisibility.set(question._id, false);
                 });
                 setAnswersVisibility(initialVisibility);
@@ -68,6 +73,28 @@ const Prepare: React.FC = () => {
         });
     };
 
+    const filterQuestions = () => {
+        let filtered = questions;
+
+        // Filter by search term
+        if (searchTerm.trim()) {
+            filtered = filtered.filter((q) =>
+                q.title.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+        }
+
+        // Filter by difficulty level
+        if (selectedLevel !== "any") {
+            filtered = filtered.filter((q) => q.level === selectedLevel);
+        }
+
+        setFilteredQuestions(filtered);
+    };
+
+    useEffect(() => {
+        filterQuestions();
+    }, [searchTerm, selectedLevel]); // Run the filter when searchTerm or selectedLevel changes
+
     useEffect(() => {
         window.scroll(0, 0);
     }, []);
@@ -79,14 +106,53 @@ const Prepare: React.FC = () => {
             <div className="min-h-screen px-4 py-6 pt-20">
                 <h1 className="mb-6 text-2xl font-bold text-center">Prepare</h1>
                 {loading ? (
-                    <div className="text-lg text-center">Loading...</div>
+                    // Loading Skeleton
+                    <div className="grid gap-6">
+                        {Array.from({ length: 5 }).map((_, index) => (
+                            <div
+                                key={index}
+                                className="p-6 bg-white rounded-lg shadow-lg dark:bg-gray-800 animate-pulse"
+                            >
+                                <div className="h-6 bg-gray-300 dark:bg-gray-600 rounded mb-4"></div>
+                                <div className="space-y-2 mb-4">
+                                    <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded"></div>
+                                    <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded"></div>
+                                    <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded"></div>
+                                </div>
+                                <div className="h-10 w-32 bg-gray-300 dark:bg-gray-600 rounded"></div>
+                            </div>
+                        ))}
+                    </div>
                 ) : (
                     <div>
+                        <div className="flex flex-col md:flex-row gap-4 mb-6">
+                            {/* Search Input */}
+                            <input
+                                type="text"
+                                placeholder="Search by question title..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full p-2 border rounded-md dark:bg-gray-800 dark:text-white"
+                            />
+
+                            {/* Filter Dropdown */}
+                            <select
+                                value={selectedLevel}
+                                onChange={(e) => setSelectedLevel(e.target.value)}
+                                className="w-full md:w-48 p-2 border rounded-md dark:bg-gray-800 dark:text-white"
+                            >
+                                <option value="any">All Levels</option>
+                                <option value="easy">Easy</option>
+                                <option value="medium">Medium</option>
+                                <option value="hard">Hard</option>
+                            </select>
+                        </div>
+
                         <p className="mb-4 text-lg">
-                            Total Questions: {questions && questions.length}
+                            Total Questions: {filteredQuestions.length}
                         </p>
                         <div className="grid gap-6">
-                            {questions.map((question, index) => (
+                            {filteredQuestions.map((question, index) => (
                                 <div
                                     key={question._id}
                                     className="p-6 bg-white rounded-lg shadow-lg dark:bg-gray-800"

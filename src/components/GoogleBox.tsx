@@ -75,7 +75,7 @@ const GoogleBox: React.FC<GoogleBoxProps> = ({ setIsLoading, type }) => {
   };
 
   return (
-    <div className="flex justify-center items-center">
+    <div className="flex items-center justify-center">
       <GoogleLogin
         onSuccess={handleGoogleLogin}
         onError={handleGoogleLoginError}

@@ -7,18 +7,13 @@ import Cookie from "universal-cookie";
 import { addUser } from './store/userSlice';
 import axiosInstance from './config/axiosConfig';
 import { useEffect } from 'react';
+import { addAdmin } from './store/adminSlice';
 
 function App() {
   const cookie = new Cookie();
   const dispatch = useDispatch();
   const user = useSelector((state: any) => state.user);
-
-  useEffect(() => {
-    if (!user) {
-      getUser();
-    }
-    console.log("User", user);
-  }, [user]);
+  const admin = useSelector((state: any) => state.admin);
 
   const getUser = async () => {
     const userToken = cookie.get('user_token');
@@ -36,14 +31,51 @@ function App() {
         cookie.remove('user_token');
       }
     } catch (error: any) {
-      if (!error?.response?.data?.status) {
+      if (!error.response.data.status) {
         cookie.remove('user_token');
       }
     }
   };
+
+  const getAdmin = async () => {
+    const adminToken = cookie.get('admin_token');
+    if (!adminToken) {
+      return; // Exit if the seller token is not available
+    }
+    try {
+      const response = await axiosInstance.get(`/admin/getAdmin`, {
+        withCredentials: true, // Keep this if you need credentials
+      });
+      const adminData = response.data;
+      if (adminData.status) {
+        dispatch(addAdmin(adminData.user));
+      } else {
+        cookie.remove('admin_token');
+      }
+    } catch (error: any) {
+      if (!error.response.data.status) {
+        cookie.remove('admin_token');
+      }
+    }
+  };
+  useEffect(() => {
+    if (!admin) {
+      getAdmin();
+    }
+    console.log("Admin", admin);
+  }, [admin]);
+
+  useEffect(() => {
+    if (!user) {
+      getUser();
+    }
+    console.log("User", user);
+  }, [user]);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
   return (
     <>
       <Background>
