@@ -129,12 +129,12 @@ function Login({ type }: Prop) {
                                     )}
                                 </button>
                                 <GoogleBox setIsLoading={setIsLoading} type={type} />
-                                <p className="text-sm ">
+                                {type == "user" && <p className="text-sm ">
                                     <span className="text-gray-500 dark:text-gray-400">Don’t have an account yet?{` `}</span>
                                     <Link to={`/${type}/signup`} className="font-medium text-primary-600 hover:underline dark:text-primary-500">
                                         SignUp
-                                    </Link>
-                                </p>
+                                    </Link></p>}
+
                                 <Link to={`/${type}/forgot`} className="text-sm font-medium text-primary-600 hover:underline dark:text-primary-500">
                                     Forgot Password?{` `}
                                 </Link>
