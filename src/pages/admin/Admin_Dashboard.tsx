@@ -118,19 +118,20 @@ const Admin_Dashboard: React.FC = () => {
 
     const handleQuestionChange = (
         index: number,
-        field: string,
+        field: keyof Question, // Restrict to valid keys of Question
         value: any
     ) => {
         setQuestions((prevQuestions) => {
             const updatedQuestions = [...prevQuestions];
-            if (field === "options") {
+            if (field === "options" && Array.isArray(value)) {
                 updatedQuestions[index].options = value;
-            } else {
-                updatedQuestions[index][field] = value;
+            } else if (field in updatedQuestions[index]) {
+                updatedQuestions[index][field] = value as never; // Use type assertion to satisfy TypeScript
             }
             return updatedQuestions;
         });
     };
+
 
     const handleSelectCorrectAnswer = (index: number, optionIndex: number) => {
         handleQuestionChange(index, "correctAnswerIndex", optionIndex);
