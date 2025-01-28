@@ -166,7 +166,7 @@ function Dashboard() {
                     text: "Date",
                     font: {
                         family: "'Inter', sans-serif",
-                        weight: "bold",
+                        weight: "bold" as const, // Fix: explicitly set the weight to "bold"
                     },
                     color: "rgb(55, 65, 81)", // For readability in dark and light mode
                 },
@@ -180,7 +180,7 @@ function Dashboard() {
                     text: "Accuracy (%)",
                     font: {
                         family: "'Inter', sans-serif",
-                        weight: "bold",
+                        weight: "bold" as const, // Fix: explicitly set the weight to "bold"
                     },
                     color: "rgb(55, 65, 81)", // For readability in dark and light mode
                 },
